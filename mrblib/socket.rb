@@ -232,8 +232,10 @@ class TCPSocket < IPSocket
       super(host, service)
     else
       s = nil
-      e = SocketError
+      e = nil
+      ret = false
       Addrinfo.foreach(host, service) { |ai|
+        next if ret
         begin
           s = Socket._socket(ai.afamily, Socket::SOCK_STREAM, 0)
           if local_host or local_service
@@ -244,12 +246,14 @@ class TCPSocket < IPSocket
           end
           Socket._connect(s, ai.to_sockaddr)
           super(s, "r+")
+          ret = true
+          e = nil
           return
         rescue => e0
           e = e0
         end
       }
-      raise e
+      raise e if e
     end
   end
 
