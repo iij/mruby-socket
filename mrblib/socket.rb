@@ -233,9 +233,7 @@ class TCPSocket < IPSocket
     else
       s = nil
       e = nil
-      ret = false
       Addrinfo.foreach(host, service) { |ai|
-        next if ret
         begin
           s = Socket._socket(ai.afamily, Socket::SOCK_STREAM, 0)
           if local_host or local_service
@@ -246,9 +244,12 @@ class TCPSocket < IPSocket
           end
           Socket._connect(s, ai.to_sockaddr)
           super(s, "r+")
-          ret = true
+          # Here is a workaround for a bug in mruby 1.3.0.  We want to
+          # return directly here but the next statement of the iterator
+          # block (`raise e if e`) will be evaluated on mruby 1.3.0,
+          # due to a known bug.
           e = nil
-          return
+          break
         rescue => e0
           e = e0
         end
