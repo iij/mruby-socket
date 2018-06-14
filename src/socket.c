@@ -15,6 +15,7 @@
 #else
   #include <sys/types.h>
   #include <sys/socket.h>
+  #include <sys/param.h>
   #include <sys/un.h>
   #include <netinet/in.h>
   #include <netinet/tcp.h>
@@ -34,6 +35,14 @@
 #include "mruby/string.h"
 #include "mruby/variable.h"
 #include "error.h"
+
+#if !defined(HAVE_SA_LEN)
+#if (defined(BSD) && (BSD >= 199006))
+#define HAVE_SA_LEN  1
+#else
+#define HAVE_SA_LEN  0
+#endif
+#endif
 
 #define E_SOCKET_ERROR             (mrb_class_get(mrb, "SocketError"))
 
@@ -658,6 +667,9 @@ mrb_socket_sockaddr_un(mrb_state *mrb, mrb_value klass)
   }
   s = mrb_str_buf_new(mrb, sizeof(struct sockaddr_un));
   sunp = (struct sockaddr_un *)RSTRING_PTR(s);
+#if HAVE_SA_LEN
+  sunp->sun_len = sizeof(struct sockaddr_un);
+#endif
   sunp->sun_family = AF_UNIX;
   memcpy(sunp->sun_path, RSTRING_PTR(path), RSTRING_LEN(path));
   sunp->sun_path[RSTRING_LEN(path)] = '\0';
