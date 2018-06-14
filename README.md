@@ -1,5 +1,7 @@
 mruby-socket
 ============
+[![Build Status](https://travis-ci.org/iij/mruby-socket.svg?branch=master)](https://travis-ci.org/iij/mruby-socket)
+
 
 "mruby-socket" mrbgem provides BSD socket interface for mruby.
 API is compatible with CRuby's "socket" library.
